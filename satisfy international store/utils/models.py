@@ -1,0 +1,13 @@
+from django.db import models
+
+
+
+class BaseOfModel(models.Model):
+    '''General base model for some models'''
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True 
+        
