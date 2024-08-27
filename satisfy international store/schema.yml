@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Satisfy Store
+  version: 1.0.0
+  description: This E-Commerce Platform is a comprehensive online shopping solution
+    designed to provide a seamless and engaging shopping experience for users. The
+    platform integrates essential e-commerce functionalities with interactive features
+    to enhance user engagement and streamline the shopping process.
+paths:
+  /store/users/:
+    post:
+      operationId: store_users_create
+      tags:
+      - store
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 255
+        password2:
+          type: string
+          writeOnly: true
+          maxLength: 255
+      required:
+      - email
+      - id
+      - password
+      - password2
+  securitySchemes:
+    jwtAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "JWT"

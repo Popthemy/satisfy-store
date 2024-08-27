@@ -1,23 +1,31 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 
 
 from store.serializers import UserSerializer
 from utils.reusable_func import get_jwt_token
+from store.schema import user_creation_doc
 # Create your views here.
 
 CustomUser = get_user_model()
 
 
-class UserViewSet(CreateModelMixin, GenericViewSet):
+class PartialUpdateOnlyMixin:
+    '''FOR THE PATCH METHOD ALONE ON THE USER MODEL'''
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+@user_creation_doc
+class UserViewSet(CreateModelMixin, PartialUpdateOnlyMixin, DestroyModelMixin, GenericViewSet):
     serializer_class = UserSerializer
-    http_method_names = ['post']
-    # permission_classes = [AllowAny]
+    # http_method_names = ['post', 'delete', 'get',]
+
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

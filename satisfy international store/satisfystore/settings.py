@@ -50,6 +50,8 @@ LOCAL_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
 
 ]
 
@@ -154,9 +156,23 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+}
+
+SPECTACULAR_SETTINGS = {
+    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+
+
+    'TITLE': 'Satisfy Store',  # Title of your API documentation
+    'DESCRIPTION': 'This E-Commerce Platform is a comprehensive online shopping solution designed to provide a seamless and engaging shopping experience for users. The platform integrates essential e-commerce functionalities with interactive features to enhance user engagement and streamline the shopping process.',
+    'VERSION': '1.0.0',  # Version of your API
+    'SERVE_INCLUDE_SCHEMA': False,  # Set to True to include the schema itself in the UI
+
 }
