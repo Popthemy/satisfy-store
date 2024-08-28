@@ -5,15 +5,16 @@ from django.core.exceptions import ValidationError
 
 CustomUser = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     id = serializers.CharField(read_only=True)
-    password = serializers.CharField(max_length=255,write_only=True)
-    password2 = serializers.CharField(max_length=255,write_only=True)
+    password = serializers.CharField(max_length=255, write_only=True)
+    password2 = serializers.CharField(max_length=255, write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'password','password2']
+        fields = ['id', 'email', 'password', 'password2']
 
     def validate(self, attrs):
         password1 = attrs.get('password')
@@ -49,3 +50,21 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         user = CustomUser.objects.create_user(**validated_data)
         return user
+
+    def to_representation(self, instance):
+        represenation = super().to_representation(instance)
+        request = self.context.get('request')
+
+        if request:
+            if request.method == 'PATCH':
+                represenation.pop('id', None)
+            represenation.pop('password', None)
+            represenation.pop('password2', None)
+
+        return represenation
+
+
+class LoginUserSerailzer(serializers.ModelSerializer):
+    class META:
+        model = CustomUser
+        fields = ['email', 'password']
