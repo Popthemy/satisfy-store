@@ -10,9 +10,9 @@ from rest_framework.exceptions import NotFound
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from store.serializers import UserSerializer,LoginUserSerailzer
+from store.serializers import UserSerializer, LoginUserSerializer
 from store.permissions import IsAuthenticatedOrReadOnly
-from store.schema import user_creation_doc
+from store.schema import user_creation_doc,user_login_doc
 
 from utils.reusable_func import get_jwt_token
 
@@ -25,7 +25,7 @@ CustomUser = get_user_model()
 class UserViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    http_method_names = ['post', 'patch','delete','get', 'head', 'options']
+    http_method_names = ['post', 'patch', 'delete', 'get', 'head', 'options']
 
     def get_queryset(self):
         user = self.request.user
@@ -51,8 +51,8 @@ class UserViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, Destro
         if serializer.is_valid():
             user = serializer.save()
             auth_token = get_jwt_token(user=user)
-            response_data = {'status': 'Success', 'message': 'Registration successful', 'detials': {
-                'accessToken': str(auth_token.access_token),
+            response_data = {'status': 'Success', 'message': 'Registration successful', 'details': {
+                'Token': auth_token,
                 'user': serializer.data
             }}
 
@@ -88,12 +88,36 @@ class UserViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, Destro
     def get_serializer_context(self):
         return {'request': self.request}
 
-class LoginUserViewset(RetrieveModelMixin,GenericViewSet):
-    serializer_class = LoginUserSerailzer
 
-    def get_queryset(self):
-        email = self.request.get('email')
-        password = self.request.get('pasword')
+@user_login_doc
+class LoginUserViewset(CreateModelMixin, GenericViewSet):
+    serializer_class = LoginUserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.validated_data
+            auth_token = get_jwt_token(user)
+
+            response_data = {'status': 'Authorized',
+                             'message': 'Login successful',
+                             'details': {
+                                 'Token': auth_token,
+                                 'user': {'id': user.id,
+                                          'email': user.email}
+                             }}
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        return Response({
+            "status": "Unprocessable Entity",
+            "message": "Login unsuccessful",
+            "statusCode": status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "errors": serializer.errors
+        }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
 
 
-        return super().get_queryset()

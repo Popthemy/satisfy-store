@@ -1,12 +1,7 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
-from store.serializers import UserSerializer
+from store.serializers import UserSerializer,LoginUserSerializer
 from store.docstring import *
 
-
-# user_creation_doc = extend_schema(
-#   request = UserSerializer,
-#   responses = {201:UserSerializer},
-# )
 
 user_creation_doc = extend_schema_view(
 
@@ -25,3 +20,10 @@ user_creation_doc = extend_schema_view(
     me=extend_schema(summary="Retrieve or update the currently authenticated user's details.", methods=['GET', 'PATCH'],
                      description=USER_ME)
 )
+
+user_login_doc = extend_schema(
+  request = LoginUserSerializer,
+  summary= 'Logs a user into the system',
+  description=USER_LOGIN
+)
+

@@ -1,7 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+
+
 
 CustomUser = get_user_model()
 
@@ -64,7 +67,23 @@ class UserSerializer(serializers.ModelSerializer):
         return represenation
 
 
-class LoginUserSerailzer(serializers.ModelSerializer):
-    class META:
-        model = CustomUser
-        fields = ['email', 'password']
+class LoginUserSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=255)
+    password = serializers.CharField(write_only=True)
+
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if email and password:
+            user = CustomUser.objects.filter(email=email).first()
+            if user:
+                if user.check_password(password):
+                    return user
+                raise serializers.ValidationError(
+                    [{'field': 'password', 'message': 'Incorrect password'}])
+            raise serializers.ValidationError(
+                [{'field': 'email', 'message': 'Incorrect email'}])
+        raise serializers.ValidationError(
+            [{'fields': 'email and password', 'message': 'Email and password cannot be empty'}])

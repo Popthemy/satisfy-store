@@ -14,6 +14,7 @@ USER_ME = """This endpoint allows an authenticated user to retrieve or update th
         - **GET**: Retrieves the current user's details.
         - **PATCH**: Partially updates the current user's details with the data provided."""
 
+USER_LOGIN = 'Logs user in with the provided information (email and password) and return their details.'
 
 """
 class LoginUserView(APIView):
@@ -48,4 +49,20 @@ class LoginUserView(APIView):
         }, status=status.HTTP_401_UNAUTHORIZED)
 
 
+        
+        def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if email and password:
+            user = User.objects.filter(email=email).first()
+            if user:
+                if user.check_password(password):
+                    return user
+                raise serializers.ValidationError(
+                    [{'field': 'password', 'message': 'Incorrect password'}])
+            raise serializers.ValidationError(
+                [{'field': 'email', 'message': 'Incorrect email'}])
+        raise serializers.ValidationError(
+            [{'field': 'email and password', 'message': 'Email and password cannot be empty'}])
 """
