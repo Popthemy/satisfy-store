@@ -14,55 +14,23 @@ USER_ME = """This endpoint allows an authenticated user to retrieve or update th
         - **GET**: Retrieves the current user's details.
         - **PATCH**: Partially updates the current user's details with the data provided."""
 
-USER_LOGIN = 'Logs user in with the provided information (email and password) and return their details.'
+USER_LOGIN =  """
+       
 
-"""
-class LoginUserView(APIView):
-    serializer_class = LoginUserSerializer
+        Validates the provided email and password. If valid, generates a JWT token for 
+        the user and returns it along with the user's ID and email. If the credentials are 
+        invalid, returns an error response.
 
-    def post(self, request):
+        Parameters
+        ----------
+        request : Request
+            The incoming HTTP request containing the user's email and password.
 
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data
+        Returns
+        -------
+        Response
+            A Response object containing the JWT token on success, or an error message 
+            on failure.
+        """
 
-            refresh_token = get_jwt_token(user)
-
-            user_obj =User.objects.get(email=user.email)
-            serializer= UserSerializer(user_obj)
-
-            response_data = {
-                "status": "success",
-                "message": "Login successful",
-                "data": {
-                    "accessToken": str(refresh_token.access_token),
-                    "user": serializer.data
-                }
-            }
-
-            return Response(response_data, status=status.HTTP_200_OK)
-
-        return Response({
-            "status": "Bad request",
-            "message": "Authentication failed",
-            "statusCode": status.HTTP_401_UNAUTHORIZED
-        }, status=status.HTTP_401_UNAUTHORIZED)
-
-
-        
-        def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        if email and password:
-            user = User.objects.filter(email=email).first()
-            if user:
-                if user.check_password(password):
-                    return user
-                raise serializers.ValidationError(
-                    [{'field': 'password', 'message': 'Incorrect password'}])
-            raise serializers.ValidationError(
-                [{'field': 'email', 'message': 'Incorrect email'}])
-        raise serializers.ValidationError(
-            [{'field': 'email and password', 'message': 'Email and password cannot be empty'}])
-"""
+USER_LOGOUT = 

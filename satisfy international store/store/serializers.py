@@ -87,3 +87,7 @@ class LoginUserSerializer(serializers.Serializer):
                 [{'field': 'email', 'message': 'Incorrect email'}])
         raise serializers.ValidationError(
             [{'fields': 'email and password', 'message': 'Email and password cannot be empty'}])
+    
+class LogoutUserSerializer(serializers.Serializer):
+    refresh =serializers.CharField()
+

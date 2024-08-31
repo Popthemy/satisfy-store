@@ -10,9 +10,11 @@ from rest_framework.exceptions import NotFound
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from store.serializers import UserSerializer, LoginUserSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from store.serializers import UserSerializer, LoginUserSerializer, LogoutUserSerializer
 from store.permissions import IsAuthenticatedOrReadOnly
-from store.schema import user_creation_doc,user_login_doc
+from store.schema import user_creation_doc, user_login_doc
 
 from utils.reusable_func import get_jwt_token
 
@@ -90,8 +92,9 @@ class UserViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, Destro
 
 
 @user_login_doc
-class LoginUserViewset(CreateModelMixin, GenericViewSet):
+class LoginUserViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = LoginUserSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -118,6 +121,17 @@ class LoginUserViewset(CreateModelMixin, GenericViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
-    
 
 
+class LogoutUserViewSet(CreateModelMixin, GenericViewSet):
+    serializer_class = LogoutUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            refresh_token = request.data.get('refresh')
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"status": "Success", "message": "Logout successful"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"status": "Error", "message": "Logout failed", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -23,7 +23,7 @@ user_creation_doc = extend_schema_view(
 
 user_login_doc = extend_schema(
   request = LoginUserSerializer,
-  summary= 'Logs a user into the system',
+  summary= 'Handle user login requests.',
   description=USER_LOGIN
 )
 
