@@ -34,5 +34,5 @@ urlpatterns = [
          SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     # local urls
-    path('store/', include('store.urls')),
+    path('auth/', include('core.urls')),
 ]

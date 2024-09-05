@@ -4,9 +4,11 @@ from utils.models import BaseOfModel
 
 
 # Create your models here.
+
 class Address(BaseOfModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE, related_name='adressess')
+                             on_delete=models.CASCADE, related_name='adresses')
+
     country_or_region = models.CharField(max_length=100)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -18,6 +20,12 @@ class Address(BaseOfModel):
     phone_number = models.CharField(max_length=20)
 
     class Meta:
+        ordering = ['first_name', 'zip_code', 'street_address1']
+        indexes = [models.Index(fields=['id', 'street_address1']),
+                   models.Index(fields=['city']),
+                   models.Index(fields=['zip_code'])
+                   ]
+
         verbose_name = 'Address'
         verbose_name_plural = 'Addresses'
 

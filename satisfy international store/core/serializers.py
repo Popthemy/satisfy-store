@@ -5,7 +5,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
 
-
 CustomUser = get_user_model()
 
 
@@ -26,23 +25,19 @@ class UserSerializer(serializers.ModelSerializer):
         errors = {}
 
         if not email:
-            errors['email'] = [
-                {'field': 'email', 'message': 'Email must be provided'}]
+            errors['email'] = ['Email must be provided']
 
         if password1 != attrs.get('password2'):
-            errors['password'] = [
-                {'field': 'password', 'message': 'Passwords must match'}]
+            errors['password'] = ['Passwords must match']
 
         if password1:
             try:
                 validate_password(password1)
             except ValidationError as e:
-                errors['password'] = [
-                    {'field': 'password', 'message': list(e.messages)}]
+                errors['password'] = [ list(e.messages)]
 
         if CustomUser.objects.filter(email=email).exists():
-            errors['email'] = [
-                {'field': 'email', 'message': 'Email already taken.'}]
+            errors['email'] = ['Email already taken.']
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -58,11 +53,11 @@ class UserSerializer(serializers.ModelSerializer):
         represenation = super().to_representation(instance)
         request = self.context.get('request')
 
-        if request:
-            if request.method == 'PATCH':
-                represenation.pop('id', None)
-            represenation.pop('password', None)
-            represenation.pop('password2', None)
+        
+        if request.method == 'PATCH':
+            represenation.pop('id', None)
+        represenation.pop('password', None)
+        represenation.pop('password2', None)
 
         return represenation
 
@@ -71,23 +66,21 @@ class LoginUserSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(write_only=True)
 
-
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
 
         if email and password:
-            user = CustomUser.objects.filter(email=email).first()
+            user = authenticate(request=self.context.get(
+                'request'), username=email, password=password)
             if user:
-                if user.check_password(password):
-                    return user
-                raise serializers.ValidationError(
-                    [{'field': 'password', 'message': 'Incorrect password'}])
-            raise serializers.ValidationError(
-                [{'field': 'email', 'message': 'Incorrect email'}])
+                return user
+            else:
+                raise serializers.ValidationError('Invalid email or password')
         raise serializers.ValidationError(
-            [{'fields': 'email and password', 'message': 'Email and password cannot be empty'}])
-    
-class LogoutUserSerializer(serializers.Serializer):
-    refresh =serializers.CharField()
+            'Must include both "email" and "password"')
 
+
+class LogoutUserSerializer(serializers.Serializer):
+    """This is specified because of the drf swagger documentation"""
+    refresh = serializers.CharField()
